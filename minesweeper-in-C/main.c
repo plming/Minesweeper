@@ -1,9 +1,10 @@
+#define _CRT_SECURITY_NO_WARNINGS
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <conio.h>
 #include <Windows.h>
-
-#pragma warning(disable: 4996)
 
 #define SIZE_ROW 10
 #define SIZE_COL 10
@@ -12,55 +13,59 @@
 #define DOWN 115
 #define LEFT 97
 #define RIGHT 100
-
 #define SPACE 32
 
-int isMine[10][10] = { 0, };	//0 means there's "no" mine, 1 means there's a mine
-int statusCell[10][10] = { 0, };	//0 means hidden, 1 means flag, 2 means opened
-int numMineAround[10][10] = { 0, };	//number of mine around
+enum _gameState
+{
+	IDLE,
+	GAMEOVER,
+	VICTORY
+};
 
 typedef struct _position
 {
-	int x;
-	int y;
+	unsigned int row;
+	unsigned int col;
 }position;
 
-position cursor;
+position playerPosition;
+bool mineExists[SIZE_ROW][SIZE_COL] = { 0, };
+bool flagExists[SIZE_ROW][SIZE_COL] = { 0, };
+bool hasUncovered[SIZE_ROW][SIZE_COL] = { 0, };
+unsigned int numAround[SIZE_ROW][SIZE_COL] = { 0, };
 
-void increaseMineNum(int row, int col)
+
+void init(int percent);
+void increaseNum(int row, int col);
+void render();
+void setColor(int foreground, int background);
+char getInput();
+int process(char keyInput);
+bool checkAllCells(void);
+
+int main()
 {
-	if (row != 0)	//UP
+	char keyInput;
+	int gameState = IDLE;
+	init(20);
+	while (gameState == IDLE)
 	{
-		numMineAround[row - 1][col]++;
+		render();
+		keyInput = getInput();
+		gameState = process(keyInput);
 	}
-	if (row != SIZE_ROW - 1)	//DOWN
+
+	if (gameState == GAMEOVER)
 	{
-		numMineAround[row + 1][col]++;
+		system("cls");
+		printf("GAME OVER !!\n");
 	}
-	if (col != 0)	//LEFT
+	else if (gameState == VICTORY)
 	{
-		numMineAround[row][col - 1]++;
+		system("cls");
+		printf("VICTORY !!\n");
 	}
-	if (col != SIZE_COL - 1)	//RIGHT
-	{
-		numMineAround[row][col + 1]++;
-	}
-	if (row != 0 && col != 0)	//LEFT UP
-	{
-		numMineAround[row - 1][col - 1]++;
-	}
-	if (row != 0 && col != SIZE_COL - 1)	//RIGHT UP
-	{
-		numMineAround[row - 1][col + 1]++;
-	}
-	if (row != SIZE_ROW - 1 && col != 0)	//LEFT DOWN
-	{
-		numMineAround[row + 1][col - 1]++;
-	}
-	if (row != SIZE_ROW - 1 && col != SIZE_COL - 1)	//LEFT DOWN
-	{
-		numMineAround[row + 1][col + 1]++;
-	}
+	return 0;
 }
 
 void init(int percent)	//Create mine according to percent
@@ -72,91 +77,184 @@ void init(int percent)	//Create mine according to percent
 	{
 		for (col = 0; col < SIZE_COL; col++)
 		{
-			if ((rand() % 100 + 1) <= percent)	//Here's mine
+			if (rand() % 100 < percent)	//mine exists
 			{
-				isMine[row][col] = 1;	//Place a mine
-				increaseMineNum(row, col);	//Increase the number of mine around
+				mineExists[row][col] = true;
+				increaseNum(row, col);
 			}
 		}
 	}
-	cursor.x = 0;
-	cursor.y = 0;
+
+	playerPosition.row = 0;
+	playerPosition.col = 0;
 }
 
-void display()//бсбр
+void increaseNum(int row, int col)
 {
+	if (row != 0)	//UP
+	{
+		numAround[row - 1][col]++;
+	}
+	if (row != SIZE_ROW - 1)	//DOWN
+	{
+		numAround[row + 1][col]++;
+	}
+	if (col != 0)	//LEFT
+	{
+		numAround[row][col - 1]++;
+	}
+	if (col != SIZE_COL - 1)	//RIGHT
+	{
+		numAround[row][col + 1]++;
+	}
+	if (row != 0 && col != 0)	//LEFT UP
+	{
+		numAround[row - 1][col - 1]++;
+	}
+	if (row != 0 && col != SIZE_COL - 1)	//RIGHT UP
+	{
+		numAround[row - 1][col + 1]++;
+	}
+	if (row != SIZE_ROW - 1 && col != 0)	//LEFT DOWN
+	{
+		numAround[row + 1][col - 1]++;
+	}
+	if (row != SIZE_ROW - 1 && col != SIZE_COL - 1)	//LEFT DOWN
+	{
+		numAround[row + 1][col + 1]++;
+	}
+}
+
+//бсбр
+void render()
+{
+	enum color
+	{
+		BLACK,
+		BLUE,
+		GREEN,
+		CYAN,
+		RED,
+		MAGENTA,
+		BROWN,
+		LIGHTGRAY,
+		DARKGRAY,
+		LIGHTBLUE,
+		LIGHTGREEN,
+		LIGHTCYAN,
+		LIGHTRED,
+		LIGHTMAGENTA,
+		YELLOW,
+		WHITE
+	};
 	int row, col;
-	system("cls");	//Clear console
+	system("cls");
 	for (row = 0; row < SIZE_ROW; row++)
 	{
 		for (col = 0; col < SIZE_COL; col++)
 		{
-			if (row == cursor.x && col == cursor.y)
+			if (playerPosition.row == row && playerPosition.col == col)
 			{
-				printf("\u001b[43;1m");	//Set text background color to bright yellow
+				setColor(BLACK, YELLOW);
+			}
+			//TODO remove this
+			if (hasUncovered[row][col])
+			{
+				printf("** ");
 			}
 			else
-			{
-				printf("\u001b[0m");	//reset text background color
-			}
-			if (statusCell[row][col] == 0)
-			{
-				printf("бр ", isMine[row][col]);
-			}
-			else
-			{
-				printf("%d ", numMineAround[row][col]);
-			}
+				printf("%2d ", mineExists[row][col]);
+			setColor(WHITE, BLACK);
 		}
 		printf("\n\n");
 	}
+	printf("M: flag the room\nSPACE: dig the room");
 }
 
-int input()	//if gameover, return 1
+void setColor(int foreground, int background)
 {
-	char keyBuffer;
-	keyBuffer = getch();
-	printf("%d\n", keyBuffer);
-	if (keyBuffer == SPACE && statusCell[cursor.x][cursor.y] == 0)
+	int color = foreground + background * 16;
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+}
+
+
+char getInput()
+{
+	char keyInput;
+	keyInput = _getch();
+	return keyInput;
+}
+
+int process(char keyInput)
+{
+	if (keyInput == LEFT && playerPosition.col != 0)
 	{
-		statusCell[cursor.x][cursor.y] = 1;
-		if (isMine[cursor.x][cursor.y] == 1)
+		playerPosition.col--;
+		printf("LEFT\n");
+		return IDLE;
+	}
+	else if (keyInput == RIGHT && playerPosition.col != SIZE_COL - 1)
+	{
+		playerPosition.col++;
+		printf("RIGHT\n");
+		return IDLE;
+	}
+	else if (keyInput == UP && playerPosition.row != 0)
+	{
+		playerPosition.row--;
+		printf("UP\n");
+		return IDLE;
+	}
+	else if (keyInput == DOWN && playerPosition.row != SIZE_ROW - 1)
+	{
+		playerPosition.row++;
+		printf("DOWN\n");
+		return IDLE;
+	}
+	else if (keyInput == 'M')	//flag
+	{
+		if (flagExists[playerPosition.row][playerPosition.col])
 		{
-			return 1;
+			flagExists[playerPosition.row][playerPosition.col] = false;
+		}
+		else
+		{
+			flagExists[playerPosition.row][playerPosition.col] = true;
 		}
 	}
-	else if (keyBuffer == UP && cursor.x != 0)
+	else if (keyInput == SPACE && hasUncovered[playerPosition.row][playerPosition.col] == false)	//uncover
 	{
-		cursor.x--;
-		printf("\nUP\n");
+		if (mineExists[playerPosition.row][playerPosition.col])
+		{
+			return GAMEOVER;
+		}
+		else
+		{
+			hasUncovered[playerPosition.row][playerPosition.col] = true;
+			if (checkAllCells()==true)
+			{
+				return VICTORY;
+			}
+		}
 	}
-	else if (keyBuffer == DOWN && cursor.x != SIZE_ROW - 1)
-	{
-		printf("\nDOWN\n");
-		cursor.x++;
-	}
-	else if (keyBuffer == LEFT && cursor.y != 0)
-	{
-		printf("\nleft\n");
-		cursor.y--;
-	}
-	else if (keyBuffer == RIGHT && cursor.y != SIZE_COL - 1)
-	{
-		printf("\nright\n");
-		cursor.y++;
-	}
-	return 0;
+	return IDLE;
 }
 
-int main()
+bool checkAllCells(void)
 {
-	int isGameOver = 0;
-	init(20);
-	while (isGameOver != 1)
+	int row, col;
+	for (row = 0; row < SIZE_ROW; row++)
 	{
-		display();
-		isGameOver = input();
+		for (col = 0; col < SIZE_COL; col++)
+		{
+			if (mineExists[row][col] == false)
+			{
+				if (hasUncovered[row][col] == false);
+				{
+					return false;
+				}
+			}
+		}
 	}
-	printf("Game Over !!\n");
-	return 0;
+	return true;
 }
