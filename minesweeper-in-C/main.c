@@ -26,7 +26,7 @@ typedef struct _position
 {
 	unsigned int row;
 	unsigned int col;
-}position;
+} position;
 
 position playerPosition;
 bool mineExists[SIZE_ROW][SIZE_COL] = { 0, };
@@ -38,16 +38,18 @@ unsigned int numAround[SIZE_ROW][SIZE_COL] = { 0, };
 void init(int percent);
 void increaseNum(int row, int col);
 void render();
+void showHowToPlay();
 void setColor(int foreground, int background);
 char getInput();
 int process(char keyInput);
 bool checkAllCells(void);
+void autoUncover(int row, int col);
 
 int main()
 {
 	char keyInput;
 	int gameState = IDLE;
-	init(20);
+	init(0);
 	while (gameState == IDLE)
 	{
 		render();
@@ -57,12 +59,10 @@ int main()
 
 	if (gameState == GAMEOVER)
 	{
-		system("cls");
 		printf("GAME OVER !!\n");
 	}
 	else if (gameState == VICTORY)
 	{
-		system("cls");
 		printf("VICTORY !!\n");
 	}
 	return 0;
@@ -125,7 +125,6 @@ void increaseNum(int row, int col)
 	}
 }
 
-//бсбр
 void render()
 {
 	enum color
@@ -157,18 +156,30 @@ void render()
 			{
 				setColor(BLACK, YELLOW);
 			}
-			//TODO remove this
-			if (hasUncovered[row][col])
+
+			if (flagExists[row][col])
 			{
-				printf("** ");
+				printf(" бс ");
+			}
+			else if (!hasUncovered[row][col])
+			{
+				printf(" бр ");
 			}
 			else
-				printf("%2d ", mineExists[row][col]);
+			{
+				printf(" %02d ", numAround[row][col]);
+			}
+
 			setColor(WHITE, BLACK);
 		}
 		printf("\n\n");
 	}
-	printf("M: flag the room\nSPACE: dig the room");
+}
+
+void showHowToPlay()
+{
+	printf("M: flag the room\nSPACE: dig the room\n");
+
 }
 
 void setColor(int foreground, int background)
@@ -211,7 +222,7 @@ int process(char keyInput)
 		printf("DOWN\n");
 		return IDLE;
 	}
-	else if (keyInput == 'M')	//flag
+	else if (keyInput == 'm' && hasUncovered[playerPosition.row][playerPosition.col] == false)	//flag
 	{
 		if (flagExists[playerPosition.row][playerPosition.col])
 		{
@@ -222,7 +233,7 @@ int process(char keyInput)
 			flagExists[playerPosition.row][playerPosition.col] = true;
 		}
 	}
-	else if (keyInput == SPACE && hasUncovered[playerPosition.row][playerPosition.col] == false)	//uncover
+	else if (keyInput == SPACE && flagExists[playerPosition.row][playerPosition.col] == false)	//uncover
 	{
 		if (mineExists[playerPosition.row][playerPosition.col])
 		{
@@ -230,8 +241,16 @@ int process(char keyInput)
 		}
 		else
 		{
-			hasUncovered[playerPosition.row][playerPosition.col] = true;
-			if (checkAllCells()==true)
+			if (numAround[playerPosition.row][playerPosition.col] != 0)
+			{
+				hasUncovered[playerPosition.row][playerPosition.col] = true;
+			}
+			else
+			{
+				autoUncover(playerPosition.row, playerPosition.col);
+			}
+
+			if (checkAllCells() == true)
 			{
 				return VICTORY;
 			}
@@ -249,7 +268,7 @@ bool checkAllCells(void)
 		{
 			if (mineExists[row][col] == false)
 			{
-				if (hasUncovered[row][col] == false);
+				if (hasUncovered[row][col] == false)
 				{
 					return false;
 				}
@@ -257,4 +276,50 @@ bool checkAllCells(void)
 		}
 	}
 	return true;
+}
+
+void autoUncover(int row, int col)
+{
+	if (hasUncovered[row][col] == true)
+	{
+		return;
+	}
+	hasUncovered[row][col] = true;
+	if (numAround[row][col] > 0)
+	{
+		return;
+	}
+	if (row != 0)	//UP
+	{
+		autoUncover(row - 1, col);
+	}
+	if (row != SIZE_ROW - 1)	//DOWN
+	{
+		autoUncover(row + 1, col);
+	}
+	if (col != 0)	//LEFT
+	{
+		autoUncover(row, col - 1);
+	}
+	if (col != SIZE_COL - 1)	//RIGHT
+	{
+		autoUncover(row, col + 1);
+	}
+	if (row != 0 && col != 0)	//LEFT UP
+	{
+		autoUncover(row - 1, col - 1);
+	}
+	if (row != 0 && col != SIZE_COL - 1)	//RIGHT UP
+	{
+		autoUncover(row - 1, col + 1);
+	}
+	if (row != SIZE_ROW - 1 && col != 0)	//LEFT DOWN
+	{
+		autoUncover(row + 1, col - 1);
+	}
+	if (row != SIZE_ROW - 1 && col != SIZE_COL - 1)	//LEFT DOWN
+	{
+		autoUncover(row + 1, col + 1);
+	}
+	return;
 }
