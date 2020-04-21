@@ -1,5 +1,5 @@
 # minesweeper-in-C
-inesweeper written in C
+Minesweeper written in C
 
 # How To Play
 * WSAD to move
