@@ -6,5 +6,5 @@ WSAD to move
 SPACE to uncover
 M to flag
 
-#Feature
+# Feature
 It uncovers around cells automatically, when you click 0 cells.
