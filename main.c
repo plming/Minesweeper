@@ -6,8 +6,8 @@
 #include <conio.h>
 #include <Windows.h>
 
-#define SIZE_ROW 10
-#define SIZE_COL 10
+#define SIZE_ROW 9
+#define SIZE_COL 9
 
 #define UP 119
 #define DOWN 115
@@ -49,7 +49,7 @@ int main()
 {
 	char keyInput;
 	int gameState = IDLE;
-	init(0);
+	init(10);
 	while (gameState == IDLE)
 	{
 		render();
@@ -60,10 +60,12 @@ int main()
 	if (gameState == GAMEOVER)
 	{
 		printf("GAME OVER !!\n");
+		system("pause");
 	}
 	else if (gameState == VICTORY)
 	{
 		printf("VICTORY !!\n");
+		system("pause");
 	}
 	return 0;
 }
@@ -174,6 +176,7 @@ void render()
 		}
 		printf("\n\n");
 	}
+	showHowToPlay();
 }
 
 void showHowToPlay()
@@ -289,6 +292,7 @@ void autoUncover(int row, int col)
 	{
 		return;
 	}
+	//check 8 directions for out of index
 	if (row != 0)	//UP
 	{
 		autoUncover(row - 1, col);
