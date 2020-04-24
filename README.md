@@ -1,4 +1,4 @@
-# minesweeper
+# minesweeper-in-C
 Minesweeper written in C
 
 # How To Play
