@@ -1,4 +1,4 @@
-#define _CRT_SECURITY_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,18 +22,22 @@ enum _gameState
 	VICTORY
 };
 
-typedef struct _position
+typedef struct _Position
 {
 	unsigned int row;
 	unsigned int col;
-} position;
+} Position;
 
-position playerPosition;
-bool mineExists[SIZE_ROW][SIZE_COL] = { 0, };
-bool flagExists[SIZE_ROW][SIZE_COL] = { 0, };
-bool hasUncovered[SIZE_ROW][SIZE_COL] = { 0, };
-unsigned int numAround[SIZE_ROW][SIZE_COL] = { 0, };
+typedef struct _Cell
+{
+	bool mineExists;
+	bool flagExists;
+	bool hasUncovered;
+	unsigned int numAround;
+} Cell;
 
+Position playerPosition;
+Cell cell[SIZE_ROW][SIZE_COL] = { 0, };
 
 void init(int percent);
 void increaseNum(int row, int col);
@@ -81,7 +85,7 @@ void init(int percent)	//Create mine according to percent
 		{
 			if (rand() % 100 < percent)	//mine exists
 			{
-				mineExists[row][col] = true;
+				cell[row][col].mineExists = true;
 				increaseNum(row, col);
 			}
 		}
@@ -95,35 +99,35 @@ void increaseNum(int row, int col)
 {
 	if (row != 0)	//UP
 	{
-		numAround[row - 1][col]++;
+		cell[row - 1][col].numAround++;
 	}
 	if (row != SIZE_ROW - 1)	//DOWN
 	{
-		numAround[row + 1][col]++;
+		cell[row + 1][col].numAround++;
 	}
 	if (col != 0)	//LEFT
 	{
-		numAround[row][col - 1]++;
+		cell[row][col - 1].numAround++;
 	}
 	if (col != SIZE_COL - 1)	//RIGHT
 	{
-		numAround[row][col + 1]++;
+		cell[row][col + 1].numAround++;
 	}
 	if (row != 0 && col != 0)	//LEFT UP
 	{
-		numAround[row - 1][col - 1]++;
+		cell[row - 1][col - 1].numAround++;
 	}
 	if (row != 0 && col != SIZE_COL - 1)	//RIGHT UP
 	{
-		numAround[row - 1][col + 1]++;
+		cell[row - 1][col + 1].numAround++;
 	}
 	if (row != SIZE_ROW - 1 && col != 0)	//LEFT DOWN
 	{
-		numAround[row + 1][col - 1]++;
+		cell[row + 1][col - 1].numAround++;
 	}
 	if (row != SIZE_ROW - 1 && col != SIZE_COL - 1)	//LEFT DOWN
 	{
-		numAround[row + 1][col + 1]++;
+		cell[row + 1][col + 1].numAround++;
 	}
 }
 
@@ -159,17 +163,17 @@ void render()
 				setColor(BLACK, YELLOW);
 			}
 
-			if (flagExists[row][col])
+			if (cell[row][col].flagExists)
 			{
 				printf(" бс ");
 			}
-			else if (!hasUncovered[row][col])
+			else if (!cell[row][col].hasUncovered)
 			{
 				printf(" бр ");
 			}
 			else
 			{
-				printf(" %02d ", numAround[row][col]);
+				printf(" %02d ", cell[row][col].numAround);
 			}
 
 			setColor(WHITE, BLACK);
@@ -225,28 +229,28 @@ int process(char keyInput)
 		printf("DOWN\n");
 		return IDLE;
 	}
-	else if (keyInput == 'm' && hasUncovered[playerPosition.row][playerPosition.col] == false)	//flag
+	else if (keyInput == 'm' && cell[playerPosition.row][playerPosition.col].hasUncovered == false)	//flag
 	{
-		if (flagExists[playerPosition.row][playerPosition.col])
+		if (cell[playerPosition.row][playerPosition.col].flagExists)
 		{
-			flagExists[playerPosition.row][playerPosition.col] = false;
+			cell[playerPosition.row][playerPosition.col].flagExists = false;
 		}
 		else
 		{
-			flagExists[playerPosition.row][playerPosition.col] = true;
+			cell[playerPosition.row][playerPosition.col].flagExists = true;
 		}
 	}
-	else if (keyInput == SPACE && flagExists[playerPosition.row][playerPosition.col] == false)	//uncover
+	else if (keyInput == SPACE && cell[playerPosition.row][playerPosition.col].flagExists == false)	//uncover
 	{
-		if (mineExists[playerPosition.row][playerPosition.col])
+		if (cell[playerPosition.row][playerPosition.col].mineExists)
 		{
 			return GAMEOVER;
 		}
 		else
 		{
-			if (numAround[playerPosition.row][playerPosition.col] != 0)
+			if (cell[playerPosition.row][playerPosition.col].numAround != 0)
 			{
-				hasUncovered[playerPosition.row][playerPosition.col] = true;
+				cell[playerPosition.row][playerPosition.col].hasUncovered = true;
 			}
 			else
 			{
@@ -269,9 +273,9 @@ bool checkAllCells(void)
 	{
 		for (col = 0; col < SIZE_COL; col++)
 		{
-			if (mineExists[row][col] == false)
+			if (cell[row][col].mineExists == false)
 			{
-				if (hasUncovered[row][col] == false)
+				if (cell[row][col].hasUncovered == false)
 				{
 					return false;
 				}
@@ -283,12 +287,12 @@ bool checkAllCells(void)
 
 void autoUncover(int row, int col)
 {
-	if (hasUncovered[row][col] == true)
+	if (cell[row][col].hasUncovered == true)
 	{
 		return;
 	}
-	hasUncovered[row][col] = true;
-	if (numAround[row][col] > 0)
+	cell[row][col].hasUncovered = true;
+	if (cell[row][col].numAround > 0)
 	{
 		return;
 	}
