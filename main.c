@@ -4,10 +4,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <conio.h>
+#include <time.h>
 #include <Windows.h>
 
 #define SIZE_ROW 9
 #define SIZE_COL 9
+#define NUM_MINE 10
 
 #define UP 119
 #define DOWN 115
@@ -15,12 +17,12 @@
 #define RIGHT 100
 #define SPACE 32
 
-enum _gameState
+enum _GameState
 {
 	IDLE,
 	GAMEOVER,
 	VICTORY
-};
+} GameState;
 
 typedef struct _Position
 {
@@ -36,10 +38,10 @@ typedef struct _Cell
 	unsigned int numAround;
 } Cell;
 
-Position playerPosition;
+Position playerPosition = { 0,0 };
 Cell cell[SIZE_ROW][SIZE_COL] = { 0, };
 
-void init(int percent);
+void init();
 void increaseNum(int row, int col);
 void render();
 void showHowToPlay();
@@ -52,21 +54,20 @@ void autoUncover(int row, int col);
 int main()
 {
 	char keyInput;
-	int gameState = IDLE;
-	init(10);
-	while (gameState == IDLE)
+	init();
+	while (GameState == IDLE)
 	{
 		render();
 		keyInput = getInput();
-		gameState = process(keyInput);
+		GameState = process(keyInput);
 	}
 
-	if (gameState == GAMEOVER)
+	if (GameState == GAMEOVER)
 	{
 		printf("GAME OVER !!\n");
 		system("pause");
 	}
-	else if (gameState == VICTORY)
+	else if (GameState == VICTORY)
 	{
 		printf("VICTORY !!\n");
 		system("pause");
@@ -74,25 +75,22 @@ int main()
 	return 0;
 }
 
-void init(int percent)	//Create mine according to percent
+void init()	//Create mine according to NUM_MINE
 {
 	int row, col;
+	int mineCounter=0;
 	srand(time(NULL));
-
-	for (row = 0; row < SIZE_ROW; row++)
+	while (mineCounter < NUM_MINE)
 	{
-		for (col = 0; col < SIZE_COL; col++)
+		row = rand() % SIZE_ROW;
+		col = rand() % SIZE_COL;
+		if (cell[row][col].mineExists == false)
 		{
-			if (rand() % 100 < percent)	//mine exists
-			{
-				cell[row][col].mineExists = true;
-				increaseNum(row, col);
-			}
+			cell[row][col].mineExists = true;
+			increaseNum(row, col);
+			mineCounter++;
 		}
 	}
-
-	playerPosition.row = 0;
-	playerPosition.col = 0;
 }
 
 void increaseNum(int row, int col)
@@ -165,27 +163,27 @@ void render()
 
 			if (cell[row][col].flagExists)
 			{
-				printf(" бс ");
+				printf("б╪");
 			}
 			else if (!cell[row][col].hasUncovered)
 			{
-				printf(" бр ");
+				printf("бр");
 			}
 			else
 			{
-				printf(" %02d ", cell[row][col].numAround);
+				printf("%2d", cell[row][col].numAround);
 			}
 
 			setColor(WHITE, BLACK);
 		}
-		printf("\n\n");
+		printf("\n");
 	}
 	showHowToPlay();
 }
 
 void showHowToPlay()
 {
-	printf("M: flag the room\nSPACE: dig the room\n");
+	printf("\nM: flag the room\nSPACE: dig the room\n");
 
 }
 
@@ -208,25 +206,21 @@ int process(char keyInput)
 	if (keyInput == LEFT && playerPosition.col != 0)
 	{
 		playerPosition.col--;
-		printf("LEFT\n");
 		return IDLE;
 	}
 	else if (keyInput == RIGHT && playerPosition.col != SIZE_COL - 1)
 	{
 		playerPosition.col++;
-		printf("RIGHT\n");
 		return IDLE;
 	}
 	else if (keyInput == UP && playerPosition.row != 0)
 	{
 		playerPosition.row--;
-		printf("UP\n");
 		return IDLE;
 	}
 	else if (keyInput == DOWN && playerPosition.row != SIZE_ROW - 1)
 	{
 		playerPosition.row++;
-		printf("DOWN\n");
 		return IDLE;
 	}
 	else if (keyInput == 'm' && cell[playerPosition.row][playerPosition.col].hasUncovered == false)	//flag
