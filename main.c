@@ -78,7 +78,7 @@ int main()
 void init()	//Create mine according to NUM_MINE
 {
 	int row, col;
-	int mineCounter=0;
+	int mineCounter = 0;
 	srand(time(NULL));
 	while (mineCounter < NUM_MINE)
 	{
