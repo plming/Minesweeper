@@ -9,22 +9,22 @@ void draw()
 	{
 		for (col = 0; col < SIZE_COL; col++)
 		{
-			if (playerPosition.row == row && playerPosition.col == col)
+			if (g_player.row == row && g_player.col == col)
 			{
 				set_color(COLOR_BLACK, COLOR_YELLOW);
 			}
 
-			if (cell[row][col].flagExists)
+			if (g_cell[row][col].has_flag)
 			{
 				printf("б╪");
 			}
-			else if (!cell[row][col].hasUncovered)
+			else if (!g_cell[row][col].is_uncovered)
 			{
 				printf("бр");
 			}
 			else
 			{
-				printf("%2d", cell[row][col].numAround);
+				printf("%2d", g_cell[row][col].num_around_mine);
 			}
 
 			set_color(COLOR_WHITE, COLOR_BLACK);

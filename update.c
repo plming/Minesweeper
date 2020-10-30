@@ -2,104 +2,118 @@
 
 int update(char keyInput)
 {
-	if (keyInput == LEFT)
+	switch (keyInput)
 	{
-		playerPosition.col = (playerPosition.col - 1) % SIZE_COL;
-	}
-	else if (keyInput == RIGHT)
-	{
-		playerPosition.col = (playerPosition.col + 1) % SIZE_COL;
-	}
-	else if (keyInput == UP)
-	{
-		playerPosition.row = (playerPosition.row - 1) % SIZE_ROW;
-	}
-	else if (keyInput == DOWN)
-	{
-		playerPosition.row = (playerPosition.row + 1) % SIZE_ROW;
-	}
-	// set flag
-	else if (keyInput == 'm' && cell[playerPosition.row][playerPosition.col].hasUncovered == false)
-	{
-		if (cell[playerPosition.row][playerPosition.col].flagExists)
+	case CONTROL_LEFT:
+		g_player.col += SIZE_COL - 1;
+		g_player.col %= SIZE_COL;
+		break;
+	case CONTROL_RIGHT:
+		g_player.col = (g_player.col + 1) % SIZE_COL;
+		break;
+	case CONTROL_UP:
+		g_player.row += SIZE_ROW - 1;
+		g_player.row %= SIZE_ROW;
+		break;
+	case CONTROL_DOWN:
+		g_player.row = (g_player.row + 1) % SIZE_ROW;
+		break;
+	case CONTROL_FLAG:
+		set_flag(g_player.row, g_player.col);
+		break;
+	case CONTROL_SPACE:
+		if (g_cell[g_player.row][g_player.col].has_flag == true)
 		{
-			cell[playerPosition.row][playerPosition.col].flagExists = false;
+			break;
 		}
-		else
+		if (g_cell[g_player.row][g_player.col].has_mine)
 		{
-			cell[playerPosition.row][playerPosition.col].flagExists = true;
+			return STATE_GAME_OVER;
 		}
-	}
-	// uncover cell
-	else if (keyInput == SPACE && cell[playerPosition.row][playerPosition.col].flagExists == false)
-	{
-		if (cell[playerPosition.row][playerPosition.col].mineExists)
-		{
-			return GAMEOVER;
-		}
-		else
-		{
-			if (cell[playerPosition.row][playerPosition.col].numAround != 0)
-			{
-				cell[playerPosition.row][playerPosition.col].hasUncovered = true;
-			}
-			else
-			{
-				autoUncover(playerPosition.row, playerPosition.col);
-			}
 
-			if (checkAllCells() == true)
-			{
-				return VICTORY;
-			}
+		if (g_cell[g_player.row][g_player.col].num_around_mine != 0)
+		{
+			g_cell[g_player.row][g_player.col].is_uncovered = true;
 		}
+		else
+		{
+			uncover_recursive(g_player.row, g_player.col);
+		}
+
+		if (is_all_uncovered() == true)
+		{
+			return STATE_VICTORY;
+		}
+		break;
+	default:
+		break;
 	}
-	return IDLE;
+	return STATE_IDLE;
 }
 
-void autoUncover(int row, int col)
+void set_flag(int row, int col)
 {
-	if (cell[row][col].hasUncovered == true)
+	if (g_cell[row][col].is_uncovered)
 	{
 		return;
 	}
-	cell[row][col].hasUncovered = true;
-	if (cell[row][col].numAround > 0)
+
+	g_cell[row][col].has_flag = !g_cell[row][col].has_flag;
+	return;
+}
+
+void uncover_recursive(int row, int col)
+{
+	if (g_cell[row][col].is_uncovered == true)
 	{
 		return;
 	}
-	//check 8 directions for out of index
-	if (row != 0)	//UP
+	g_cell[row][col].is_uncovered = true;
+	if (g_cell[row][col].num_around_mine > 0)
 	{
-		autoUncover(row - 1, col);
+		return;
 	}
-	if (row != SIZE_ROW - 1)	//DOWN
+	// Check 8 directions for out of index
+
+	// Up
+	if (row != 0)
 	{
-		autoUncover(row + 1, col);
+		uncover_recursive(row - 1, col);
 	}
-	if (col != 0)	//LEFT
+	// Down
+	if (row != SIZE_ROW - 1)
 	{
-		autoUncover(row, col - 1);
+		uncover_recursive(row + 1, col);
 	}
-	if (col != SIZE_COL - 1)	//RIGHT
+	// Left
+	if (col != 0)
 	{
-		autoUncover(row, col + 1);
+		uncover_recursive(row, col - 1);
 	}
-	if (row != 0 && col != 0)	//LEFT UP
+	// Right
+	if (col != SIZE_COL - 1)
 	{
-		autoUncover(row - 1, col - 1);
+		uncover_recursive(row, col + 1);
 	}
-	if (row != 0 && col != SIZE_COL - 1)	//RIGHT UP
+	// Left up
+	if (row != 0 && col != 0)
 	{
-		autoUncover(row - 1, col + 1);
+		uncover_recursive(row - 1, col - 1);
 	}
-	if (row != SIZE_ROW - 1 && col != 0)	//LEFT DOWN
+	// Right up
+	if (row != 0 && col != SIZE_COL - 1)
 	{
-		autoUncover(row + 1, col - 1);
+		uncover_recursive(row - 1, col + 1);
 	}
-	if (row != SIZE_ROW - 1 && col != SIZE_COL - 1)	//LEFT DOWN
+	// Left down
+	if (row != SIZE_ROW - 1 && col != 0)
 	{
-		autoUncover(row + 1, col + 1);
+		uncover_recursive(row + 1, col - 1);
+	}
+	// Right down
+	if (row != SIZE_ROW - 1 && col != SIZE_COL - 1)
+	{
+		uncover_recursive(row + 1, col + 1);
 	}
 	return;
 }
