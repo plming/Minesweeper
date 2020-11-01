@@ -18,13 +18,16 @@
     <ClCompile Include="main.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="func.c">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="update.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="draw.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="initialize.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="input.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -33,6 +36,12 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="draw.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="update.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="initialize.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

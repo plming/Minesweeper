@@ -1,11 +1,9 @@
 #pragma once
 
-#define _CRT_SECURE_NO_WARNINGS
-#include <stdio.h>
+#include <assert.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <conio.h>
-#include <time.h>
+
 #include <Windows.h>
 
 typedef enum state
@@ -33,26 +31,8 @@ typedef struct cell
 #define SIZE_COL (9)
 #define NUM_MINE (10)
 
-enum control
-{
-	CONTROL_UP = 'w',
-	CONTROL_DOWN = 's',
-	CONTROL_LEFT = 'a',
-	CONTROL_RIGHT = 'd',
-	CONTROL_FLAG = 'm',
-	CONTROL_SPACE = ' '
-};
-
 extern state_t g_game;
 extern position_t g_player;
-extern cell_t g_cell[SIZE_ROW][SIZE_COL];
-
-void initialize();
-void increase_cell_num(int row, int col);
-void draw();
+extern cell_t** g_cell;
 
 char get_input();
-int update(char keyInput);
-bool is_all_uncovered(void);
-void uncover_recursive(int row, int col);
-void set_flag(int row, int col);

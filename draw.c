@@ -1,5 +1,5 @@
-#include "minesweeper.h"
 #include "draw.h"
+#include "minesweeper.h"
 
 void draw()
 {
@@ -43,7 +43,7 @@ void show_controls()
 	return;
 }
 
-void set_color(int foreground, int background)
+void set_color(color_t foreground, color_t background)
 {
 	int color = foreground + background * 16;
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);

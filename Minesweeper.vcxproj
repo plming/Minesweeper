@@ -139,13 +139,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="draw.c" />
-    <ClCompile Include="func.c" />
+    <ClCompile Include="input.c" />
+    <ClCompile Include="initialize.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="update.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="draw.h" />
+    <ClInclude Include="initialize.h" />
     <ClInclude Include="minesweeper.h" />
+    <ClInclude Include="update.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

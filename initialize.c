@@ -1,16 +1,20 @@
+
 #include "minesweeper.h"
+#include "initialize.h"
 
 // Place mine as many as NUM_MINE
 void initialize()
 {
 	g_game = STATE_IDLE;
-	unsigned int row, col;
-	int mine_count = 0;
 	srand((unsigned int)time(NULL));
+
+	g_cell = generate_cells_malloc(9, 9);
+
+	int mine_count = 0;
 	while (mine_count < NUM_MINE)
 	{
-		row = rand() % SIZE_ROW;
-		col = rand() % SIZE_COL;
+		unsigned int row = rand() % SIZE_ROW;
+		unsigned int col = rand() % SIZE_COL;
 
 		if (g_cell[row][col].has_mine == false)
 		{
@@ -19,6 +23,25 @@ void initialize()
 			mine_count++;
 		}
 	}
+}
+
+cell_t** generate_cells_malloc(int row, int col)
+{
+	cell_t** pa_cells = malloc(sizeof(cell_t*) * 9);
+	assert(pa_cells != NULL);
+	for (int i = 0; i < 9; i++)
+	{
+		pa_cells[i] = malloc(sizeof(cell_t) * 9);
+		assert(pa_cells[i] != NULL);
+		for (int j = 0; j < 9; j++)
+		{
+			pa_cells[i][j].has_mine = false;
+			pa_cells[i][j].has_flag = false;
+			pa_cells[i][j].is_uncovered = false;
+			pa_cells[i][j].num_around_mine = 0;
+		}
+	}
+	return pa_cells;
 }
 
 void increase_cell_num(int row, int col)
@@ -65,30 +88,3 @@ void increase_cell_num(int row, int col)
 	}
 	return;
 }
-
-char get_input()
-{
-	char key;
-	key = _getch();
-	return key;
-}
-
-bool is_all_uncovered(void)
-{
-	int row, col;
-	for (row = 0; row < SIZE_ROW; row++)
-	{
-		for (col = 0; col < SIZE_COL; col++)
-		{
-			if (g_cell[row][col].has_mine == false)
-			{
-				if (g_cell[row][col].is_uncovered == false)
-				{
-					return false;
-				}
-			}
-		}
-	}
-	return true;
-}
-
