@@ -1,4 +1,4 @@
-#include "minesweeper.h"
+ï»¿#include "minesweeper.h"
 #include "initialize.h"
 #include "draw.h"
 #include "update.h"
@@ -14,7 +14,7 @@ int main(void)
 	initialize();
 	while (g_game == STATE_IDLE)
 	{
-		// TODO: getinput, update, draw ¼øÀ¸·Î ¹Ù²Ù±â
+		// TODO: getinput, update, draw ìˆœìœ¼ë¡œ ë°”ê¾¸ê¸°
 		draw();
 		key_input = get_input();
 		g_game = update(key_input);

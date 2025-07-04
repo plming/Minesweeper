@@ -1,4 +1,4 @@
-#include "update.h"
+﻿#include "update.h"
 #include "minesweeper.h"
 
 state_t update(char key_input)

@@ -1,4 +1,4 @@
-#include <conio.h>
+﻿#include <conio.h>
 #include "minesweeper.h"
 
 char get_input()

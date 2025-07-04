@@ -1,4 +1,4 @@
-#include "draw.h"
+ï»¿#include "draw.h"
 #include "minesweeper.h"
 
 void draw()
@@ -16,11 +16,11 @@ void draw()
 
 			if (g_cell[row][col].has_flag)
 			{
-				printf("¡Ø");
+				printf("â€»");
 			}
 			else if (!g_cell[row][col].is_uncovered)
 			{
-				printf("¡à");
+				printf("â–¡");
 			}
 			else
 			{
